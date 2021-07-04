@@ -1,0 +1,14 @@
+spring:
+   profiles:
+      active: sandbox
+
+---
+spring:
+   config:
+      activate:
+         on-profile: sandbox
+square:
+   ENVIRONMENT: sandbox
+   APPLICATION_ID: sandbox-sq0idb-LOyMBsAFn9ArHH847lGunw
+   ACCESS_TOKEN: EAAAENWpLaQIgt0RoZyFaAmx-mWaOCatjjS4l9aM2qi3XCvYXXWDVQUGmbY6WCEP
+   LOCATION_ID: LAXQ9YHATZP0G

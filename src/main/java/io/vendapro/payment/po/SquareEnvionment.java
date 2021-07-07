@@ -11,5 +11,5 @@ public class SquareEnvionment implements  Serializable{
 	private String locationId;
 	private String appId;
 	private String currency;
-	private String contry;
+	private String country;
 }

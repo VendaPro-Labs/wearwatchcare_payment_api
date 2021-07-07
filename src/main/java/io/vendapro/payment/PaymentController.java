@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.squareup.square.api.PaymentsApi;
 import com.squareup.square.exceptions.ApiException;
 import com.squareup.square.models.CreatePaymentRequest;
+import com.squareup.square.models.CreatePaymentResponse;
 import com.squareup.square.models.Money;
 
 import io.vendapro.payment.po.PaymentRequest;
@@ -34,17 +35,19 @@ public class PaymentController {
 		squareEnvionment.setLocationId(applicationSquareConfig.getLOCATION_ID());
 		squareEnvionment.setAppId(applicationSquareConfig.getAPPLICATION_ID());
 		squareEnvionment.setCurrency(this.squareClientAccess.getCurrency());
-		squareEnvionment.setContry(this.squareClientAccess.getCountry());
+		squareEnvionment.setCountry(this.squareClientAccess.getCountry());
 		return squareEnvionment;
 	}
 	
 	@PostMapping("/process-payment")
 	public @ResponseBody PaymentResult processPayment(@RequestBody PaymentRequest paymentRequest) {
 		
+		System.out.println( "paymentRequest Received: " + paymentRequest);;
+		
 		String currency = this.squareClientAccess.getCurrency();
 		
 		Money bodyAmountMoney = new Money.Builder()
-				.amount(paymentRequest.getMoneyAmount())
+				.amount(paymentRequest.getTotalAmount())
 				.currency(currency)
 				.build();
 		
@@ -58,12 +61,16 @@ public class PaymentController {
 		PaymentsApi paymentApi = this.squareClientAccess.getSquareClient().getPaymentsApi();
 		
 		return paymentApi.createPaymentAsync(createPaymentRequest)
-			.thenApply( result -> {
-				return new PaymentResult("SUCCESS", null);
+			.thenApply( result -> { 
+				CreatePaymentResponse data = (CreatePaymentResponse) result;
+				PaymentResult paymentResult =  new PaymentResult("SUCCESS", null);
+				paymentResult.setRefId(data.getPayment().getId());
+				paymentResult.setStatus(data.getPayment().getStatus());
+				return paymentResult;
 			})
 			.exceptionally(e -> {
 				ApiException ae = (ApiException) e.getCause();
-				return new PaymentResult("FAILURE", ae);
+				return new PaymentResult("FAILURE", ae.toString());
 			})
 			.join();
 		
